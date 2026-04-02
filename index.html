@@ -298,32 +298,54 @@
 <div id="modal-root"></div>
 
 <script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycby6pXlMC-vDa4vDJE9XJX761YccTxm01to79mfrsxG8EzH1VEEYOA5bh0Ywo18516DuSA/exec';
+
 let currentView = 'all';
-let nextId = 23;
-let bids = [
-  {id:1,  name:'청산배수지건설공사기본및실시설계용역', client:'연천군맑은물관리사업소', annoDate:'2025-12-31', deadline:'2026-01-13', openDate:'2026-02-12', rank:'14위', totalAmt:1983366000, pct:3.70, myAmt:73384542, partners:'삼안:한맥:바론:경수=70:30:측량:지반', result:'타사낙찰', winner:'동명', note:''},
-  {id:2,  name:'포천천 인도교 설치사업 기본 및 실시설계 용역', client:'경기도 포천시', annoDate:'2025-12-30', deadline:'2026-01-06', openDate:'-', rank:'-', totalAmt:987470000, pct:1.40, myAmt:13824580, partners:'삼안:XX:바론:XX', result:'불참', winner:'-', note:''},
-  {id:3,  name:'하성농어촌도로리도207호선개설사업기본및실시설계용역', client:'경기도 김포시', annoDate:'2025-12-30', deadline:'2026-01-06', openDate:'2026-01-07(11시)', rank:'22위', totalAmt:479270000, pct:29.00, myAmt:138988300, partners:'삼안:주하:바론:에스피=70:30:측량:지반', result:'타사낙찰', winner:'경동', note:''},
-  {id:4,  name:'진주시 나불지구 풍수해생활권 종합정비사업 기본 및 실시설계', client:'경상남도 진주시', annoDate:'2026-01-05', deadline:'2026-01-20', openDate:'2026-02-27(11시)', rank:'21위', totalAmt:3540500000, pct:11.86, myAmt:419903300, partners:'한맥+혜인+바론+세경(70:30:측량:지질)', result:'타사낙찰', winner:'유신', note:''},
-  {id:5,  name:'양평군 노후하수관로 정비사업 실시설계 용역', client:'양평군환경사업소', annoDate:'2026-01-07', deadline:'2026-01-19', openDate:'2026-02-12(11시)', rank:'10위', totalAmt:1601677000, pct:13.30, myAmt:213023041, partners:'삼안:다산:바론=74:26:측량', result:'타사낙찰', winner:'이산', note:''},
-  {id:6,  name:"금강 하천시설 유지보수 실시설계용역('26~'28년)", client:'금강유역환경청', annoDate:'2025-12-30', deadline:'2026-01-16', openDate:'2026-02-12(13시)', rank:'2위', totalAmt:745000000, pct:10.00, myAmt:74500000, partners:'삼안:한맥:바론=60:40:측량', result:'타사낙찰', winner:'도화', note:''},
-  {id:7,  name:'탄천.한강변차집관로정비공사기본및실시설계용역(협상)', client:'서울특별시', annoDate:'2026-02-09', deadline:'-', openDate:'-', rank:'-', totalAmt:0, pct:0, myAmt:0, partners:'', result:'불참', winner:'-', note:''},
-  {id:8,  name:'수내천(소하천)정비사업 기본 및 실시설계용역', client:'경기도 파주시', annoDate:'2026-01-28', deadline:'2026-02-06', openDate:'2026-02-09(11시)', rank:'16위', totalAmt:613130000, pct:12.00, myAmt:73575600, partners:'삼안:한맥:바론:GSTA=70:30:측량:지반', result:'타사낙찰', winner:'건일', note:''},
-  {id:9,  name:'구례군 소하천정비종합계획수립 및 지형도면신고시 용역', client:'구례군', annoDate:'2026-02-20', deadline:'2026-03-05', openDate:'-', rank:'-', totalAmt:3000000000, pct:25.27, myAmt:0, partners:'한맥:XX:바론:XX', result:'불참', winner:'-', note:''},
-  {id:10, name:'경기북부야생동물 생태관찰원조성사업기본및실시설계용역', client:'경기도청북부청사', annoDate:'2026-02-26', deadline:'2026-03-04', openDate:'2026-03-05(15시)', rank:'-', totalAmt:320870000, pct:10.00, myAmt:32087000, partners:'삼안:75.7:바론:10:소울건축14.86', result:'타사낙찰', winner:'도화', note:''},
-  {id:11, name:'평택시통복천생태하천복원실시설계용역(장기계속계약)', client:'평택시', annoDate:'2026-01-13', deadline:'2026-01-26', openDate:'', rank:'', totalAmt:1279100000, pct:11.50, myAmt:147096500, partners:'삼안:한맥:바론:에스피=70:30:측량+지반', result:'진행중', winner:'', note:''},
-  {id:12, name:'안양시분류식하수관로및노후하수관로정비공사기본및실시설계용역', client:'안양시', annoDate:'2026-02-02', deadline:'2026-02-13', openDate:'', rank:'', totalAmt:1395680000, pct:6.26, myAmt:87369568, partners:'삼안:태조:바론:GSTA=75:25:측량:지반', result:'진행중', winner:'', note:''},
-  {id:13, name:'왕산.갈담자연재해위험개선지구정비사업기본및실시설계용역', client:'용인특례시', annoDate:'2026-02-05', deadline:'2026-02-25', openDate:'', rank:'', totalAmt:3602000000, pct:5.20, myAmt:187304000, partners:'삼안:한맥:바론:GSTA=70:30:측량+지반', result:'진행중', winner:'', note:''},
-  {id:14, name:'파주시소하천정비종합계획재수립용역', client:'파주시', annoDate:'2026-02-05', deadline:'2026-02-20', openDate:'', rank:'', totalAmt:3084000000, pct:23.70, myAmt:730908000, partners:'삼안:한맥:바론=71:29:측량', result:'진행중', winner:'', note:''},
-  {id:15, name:'초월지구풍수해생활권종합정비사업기본및실시설계용역', client:'경기도광주시', annoDate:'2026-02-10', deadline:'2026-02-24', openDate:'', rank:'', totalAmt:3363704000, pct:3.70, myAmt:124457048, partners:'삼안:한맥:바론:에스피=70:30:측량+지반', result:'진행중', winner:'', note:''},
-  {id:16, name:'평택시북부지역노후상수관망정비사업기본및실시설계용역', client:'평택시상하수도사업소', annoDate:'2026-02-10', deadline:'2026-02-24', openDate:'', rank:'', totalAmt:3000000000, pct:7.86, myAmt:235800000, partners:'삼안:바론=분담(설계:측량=92.14:7.86)', result:'진행중', winner:'', note:''},
-  {id:17, name:'안양시 노후상수관망정비사업실시설계용역', client:'안양시', annoDate:'2026-02-11', deadline:'2026-02-25', openDate:'', rank:'', totalAmt:1671659000, pct:12.86, myAmt:214975347, partners:'삼안:태조:바론:에스피=70:30:측량+지반', result:'진행중', winner:'', note:''},
-  {id:18, name:'김해시 소하천 정비종합계획 재수립 및 지형도면고시용역', client:'김해시', annoDate:'2026-02-26', deadline:'2026-03-10', openDate:'3월 중', rank:'', totalAmt:3285800000, pct:19.04, myAmt:625616320, partners:'한맥:XX:바론:XX', result:'진행중', winner:'', note:''},
-  {id:19, name:'충남 어사 자연재해위험개선지구 정비사업 기본 및 실시설계용역', client:'홍성군', annoDate:'2026-02-27', deadline:'2026-03-10', openDate:'3월 중', rank:'', totalAmt:2263590000, pct:5.29, myAmt:119743911, partners:'한맥:XX:바론:XX', result:'진행중', winner:'', note:''},
-  {id:20, name:'유동 자연재해위험개선지구 정비사업 기본 및 실시설계용역', client:'함안군', annoDate:'2026-03-03', deadline:'2026-03-13', openDate:'3월 중', rank:'', totalAmt:906000000, pct:7.14, myAmt:64688400, partners:'한맥:XX:바론:XX', result:'진행중', winner:'', note:''},
-  {id:21, name:'국수 공공하수처리시설 증설사업 기본 및 실시설계 용역', client:'양평군환경사업소', annoDate:'2026-02-24', deadline:'2026-03-10', openDate:'3월 중', rank:'', totalAmt:991100000, pct:0.60, myAmt:5946600, partners:'삼안:한맥:바론=70:30:측량', result:'진행중', winner:'', note:''},
-  {id:22, name:'세종 스마트 국가산단 진입도로 건설공사 기본 및 실시설계용역', client:'세종특별자치시', annoDate:'2026-03-10', deadline:'2026-03-25', openDate:'미정', rank:'', totalAmt:1500000000, pct:6.99, myAmt:104850000, partners:'한맥:86.18:바론:6.99:XX지질6.83', result:'진행중', winner:'', note:'3/11연락옴'},
-];
+let nextId = 100;
+let bids = [];
+
+// ── Google Sheets 연동 ──────────────────────────────
+async function loadFromSheet() {
+  document.getElementById('tbody').innerHTML = '<tr><td colspan="14"><div class="empty">데이터 불러오는 중...</div></td></tr>';
+  try {
+    const res = await fetch(GAS_URL);
+    const data = await res.json();
+    if (data && data.length > 0) {
+      bids = data.map(row => ({
+        id: Number(row.id),
+        name: row.name || '',
+        client: row.client || '',
+        annoDate: row.annoDate || '',
+        deadline: row.deadline || '',
+        openDate: row.openDate || '',
+        rank: row.rank || '',
+        totalAmt: Number(row.totalAmt) || 0,
+        pct: Number(row.pct) || 0,
+        myAmt: Number(row.myAmt) || 0,
+        partners: row.partners || '',
+        result: row.result || '진행중',
+        winner: row.winner || '',
+        note: row.note || '',
+      }));
+      nextId = Math.max(...bids.map(b => b.id), 0) + 1;
+    }
+  } catch(e) {
+    toast('데이터 불러오기 실패. 새로고침 해주세요.');
+  }
+  render();
+}
+
+async function saveToSheet() {
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'save', bids }),
+    });
+  } catch(e) {
+    toast('저장 실패. 다시 시도해주세요.');
+  }
+}
+// ───────────────────────────────────────────────────
 
 const fmtAmt = n => {
   if (!n) return '-';
@@ -494,20 +516,7 @@ function openModal(bid=null) {
 
 function closeModal() { document.getElementById('modal-root').innerHTML=''; }
 
-function saveBids() {
-  try { localStorage.setItem('bids_data', JSON.stringify(bids)); localStorage.setItem('bids_nextId', String(nextId)); } catch(e) {}
-}
-
-function loadBids() {
-  try {
-    const saved = localStorage.getItem('bids_data');
-    const savedId = localStorage.getItem('bids_nextId');
-    if (saved) { bids = JSON.parse(saved); }
-    if (savedId) { nextId = parseInt(savedId); }
-  } catch(e) {}
-}
-
-function saveBid(id) {
+async function saveBid(id) {
   const name=document.getElementById('f-name').value.trim();
   const client=document.getElementById('f-client').value.trim();
   if(!name||!client){alert('용역명과 발주처는 필수입니다.');return;}
@@ -524,25 +533,29 @@ function saveBid(id) {
     winner:document.getElementById('f-winner').value.trim(),
     note:document.getElementById('f-note').value.trim(),
   };
-  if(id !== null && id !== undefined){
+  if(id !== null && id !== 'null' && id !== undefined){
     const numId = Number(id);
-    const i=bids.findIndex(b=>Number(b.id)===numId);
-    if(i===-1){alert('수정할 항목을 찾을 수 없습니다.');return;}
+    const i = bids.findIndex(b=>Number(b.id)===numId);
+    if(i===-1){alert('항목을 찾을 수 없습니다.');return;}
     bids[i]={...bids[i],...obj};
-    toast('수정되었습니다.');
+    toast('저장 중...');
   } else {
     bids.push({id:nextId++,...obj});
-    toast('추가되었습니다.');
+    toast('저장 중...');
   }
-  saveBids(); closeModal(); render();
+  closeModal(); render();
+  await saveToSheet();
+  toast('저장 완료!');
 }
 
 function editBid(id){openModal(bids.find(b=>Number(b.id)===Number(id)));}
 
-function deleteBid(id){
+async function deleteBid(id){
   if(!confirm('삭제하시겠습니까?'))return;
   bids=bids.filter(b=>Number(b.id)!==Number(id));
-  saveBids(); toast('삭제되었습니다.'); render();
+  render(); toast('저장 중...');
+  await saveToSheet();
+  toast('삭제 완료!');
 }
 
 function exportCSV(){
@@ -566,8 +579,8 @@ function toast(msg){
   toastTimer=setTimeout(()=>el.remove(),2500);
 }
 
-loadBids();
-render();
+loadFromSheet();
+</script>
 </script>
 </body>
 </html>
