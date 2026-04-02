@@ -470,7 +470,7 @@ function openModal(bid=null) {
         <div class="field"><label>총 사업금액 (원)</label><input id="f-total" type="number" value="${b.totalAmt||''}" placeholder="예: 1000000000"></div>
         <div class="field"><label>바론 지분율 (%)</label><input id="f-pct" type="number" step="0.01" value="${b.pct||''}" placeholder="예: 12.5"></div>
         <div class="field"><label>바론 지분금액 (원)</label><input id="f-myamt" type="number" value="${b.myAmt||''}" placeholder="지분율 입력시 자동계산"></div>
-        <div class="field"><label>결과</label><select id="f-result">
+        <div class="field"><label>결과</label><select id="f-result-modal">
           ${['진행중','타사낙찰','낙찰','불참'].map(s=>`<option${b.result===s?' selected':''}>${s}</option>`).join('')}
         </select></div>
         <div class="field full"><label>참여사 구성</label><input id="f-partners" value="${b.partners||''}" placeholder="예: 삼안:한맥:바론=70:30:측량"></div>
@@ -507,7 +507,7 @@ function saveBid(id) {
     pct:parseFloat(document.getElementById('f-pct').value)||0,
     myAmt:parseInt(document.getElementById('f-myamt').value)||0,
     partners:document.getElementById('f-partners').value.trim(),
-    result:document.getElementById('f-result').value,
+    result:document.getElementById('f-result-modal').value,
     winner:document.getElementById('f-winner').value.trim(),
     note:document.getElementById('f-note').value.trim(),
   };
