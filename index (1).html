@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>경영기획팀 입찰관리</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1f2435;
+    --border: #2a3045;
+    --border2: #3a4260;
+    --accent: #4ade80;
+    --accent2: #22c55e;
+    --text: #e8eaf2;
+    --muted: #7a84a0;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --info: #60a5fa;
+    --purple: #a78bfa;
+    --radius: 10px;
+    --font: 'Noto Sans KR', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.6; }
+
+  .shell { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 220px; min-height: 100vh; background: var(--surface);
+    border-right: 1px solid var(--border); padding: 28px 0;
+    display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; flex-shrink: 0;
+  }
+  .logo {
+    padding: 0 24px 24px; font-size: 14px; font-weight: 700; color: var(--accent);
+    display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border);
+  }
+  .logo-icon {
+    width: 32px; height: 32px; background: var(--accent); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .nav { padding: 16px 12px 0; flex: 1; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+    border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--muted);
+    transition: all 0.15s; margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(74,222,128,0.1); color: var(--accent); }
+  .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1px 7px; font-size: 11px; font-family: var(--mono);
+  }
+  .nav-item.active .nav-badge { background: rgba(74,222,128,0.15); border-color: rgba(74,222,128,0.3); color: var(--accent); }
+
+  .main { flex: 1; padding: 32px 36px; overflow-x: auto; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .page-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+  .page-subtitle { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .btn {
+    padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: none; font-family: var(--font); transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--accent); color: #0a1a0a; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid rgba(248,113,113,0.25); }
+  .btn-danger:hover { background: rgba(248,113,113,0.08); }
+  .btn-edit { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-edit:hover { color: var(--text); border-color: var(--border2); }
+
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; margin-bottom: 24px; }
+  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; transition: border-color 0.2s; }
+  .metric-card:hover { border-color: var(--border2); }
+  .metric-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .metric-val { font-size: 26px; font-weight: 700; font-family: var(--mono); letter-spacing: -1px; }
+  .metric-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .m-green .metric-val { color: var(--accent); }
+  .m-green { border-color: rgba(74,222,128,0.2); }
+  .m-warn .metric-val { color: var(--warn); }
+  .m-warn { border-color: rgba(251,191,36,0.2); }
+  .m-info .metric-val { color: var(--info); }
+  .m-info { border-color: rgba(96,165,250,0.2); }
+
+  .alert {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: rgba(251,191,36,0.07); border: 1px solid rgba(251,191,36,0.25);
+    border-radius: var(--radius); padding: 11px 14px; margin-bottom: 18px;
+    font-size: 12px; color: var(--warn); line-height: 1.5;
+  }
+
+  .filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; }
+  .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .search-input {
+    width: 100%; padding: 8px 10px 8px 34px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+    font-size: 12px; font-family: var(--font); outline: none; transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+  select {
+    padding: 8px 28px 8px 10px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 12px; font-family: var(--font);
+    outline: none; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%237a84a0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 9px center; transition: border-color 0.15s;
+  }
+  select:focus { border-color: var(--accent); }
+  select option { background: var(--surface2); }
+
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; min-width: 1300px; }
+  thead { background: var(--surface2); }
+  th {
+    padding: 10px 12px; text-align: left; font-size: 10px; color: var(--muted);
+    font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  td { padding: 11px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 12px; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background 0.1s; }
+  tbody tr:hover { background: var(--surface2); }
+
+  .td-name { font-weight: 500; color: var(--text); line-height: 1.4; max-width: 340px; min-width: 280px; }
+  .td-client { color: var(--muted); white-space: nowrap; }
+  .td-partner { color: var(--muted); font-size: 11px; max-width: 200px; line-height: 1.4; }
+  .td-amt { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+  .td-pct { font-family: var(--mono); font-size: 12px; color: var(--info); white-space: nowrap; }
+  .td-note { color: var(--muted); font-size: 11px; max-width: 120px; }
+  .td-rank { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 500; white-space: nowrap;
+  }
+  .badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
+  .badge-진행중 { background: rgba(251,191,36,0.12); color: var(--warn); }
+  .badge-타사낙찰 { background: rgba(248,113,113,0.12); color: var(--danger); }
+  .badge-불참 { background: rgba(122,132,160,0.12); color: var(--muted); }
+  .badge-낙찰 { background: rgba(74,222,128,0.12); color: var(--accent); }
+
+  .row-acts { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+  tbody tr:hover .row-acts { opacity: 1; }
+
+  .date-cell { font-family: var(--mono); font-size: 11px; white-space: nowrap; color: var(--muted); }
+  .date-urgent { color: var(--danger) !important; font-weight: 500; }
+  .date-warn { color: var(--warn) !important; }
+
+  .empty { text-align: center; padding: 50px 20px; color: var(--muted); font-size: 13px; }
+
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200; backdrop-filter: blur(3px); animation: fadeIn 0.15s ease;
+  }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: 14px; padding: 26px; width: min(580px,96vw);
+    max-height: 90vh; overflow-y: auto; animation: slideUp 0.2s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(12px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.full { grid-column: 1/-1; }
+  .field label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+  .field input, .field select, .field textarea {
+    padding: 8px 10px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 12px; font-family: var(--font);
+    outline: none; transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+  .field input::placeholder, .field textarea::placeholder { color: var(--muted); }
+  .field textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+  .toast {
+    position: fixed; bottom: 22px; right: 22px; z-index: 999;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 10px 18px; font-size: 12px;
+    display: flex; align-items: center; gap: 8px;
+    animation: toastIn 0.2s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  @keyframes toastIn { from{transform:translateY(6px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .field.full { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0a1a0a" stroke-width="2.5">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <path d="M8 12h8M8 8h5M8 16h3"/>
+        </svg>
+      </div>
+      경영기획팀
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="setView('all')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="5" rx="1"/><rect x="3" y="10" width="18" height="5" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/></svg>
+        전체 목록 <span class="nav-badge" id="nb-all">0</span>
+      </div>
+      <div class="nav-item" onclick="setView('active')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        진행중 <span class="nav-badge" id="nb-active">0</span>
+      </div>
+      <div class="nav-item" onclick="setView('lost')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+        타사낙찰 <span class="nav-badge" id="nb-lost">0</span>
+      </div>
+      <div class="nav-item" onclick="setView('skip')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        불참 <span class="nav-badge" id="nb-skip">0</span>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="page-title">입찰 참여 현황</div>
+        <div class="page-subtitle" id="page-subtitle"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="exportCSV()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          CSV 내보내기
+        </button>
+        <button class="btn btn-primary" onclick="openModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          입찰 추가
+        </button>
+      </div>
+    </div>
+
+    <div id="alert-area"></div>
+    <div class="metrics" id="metrics"></div>
+
+    <div class="filters">
+      <div class="search-wrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search-input" type="text" id="search" placeholder="용역명, 발주처, 참여사 검색..." oninput="render()">
+      </div>
+      <select id="f-result" onchange="render()">
+        <option value="">전체 결과</option>
+        <option>진행중</option><option>타사낙찰</option><option>낙찰</option><option>불참</option>
+      </select>
+      <select id="f-sort" onchange="render()">
+        <option value="deadline">마감일순</option>
+        <option value="amount">사업금액순</option>
+        <option value="pct">지분율순</option>
+        <option value="created">등록순</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:320px">용역명</th>
+            <th>발주처</th>
+            <th>공고일</th>
+            <th>마감일</th>
+            <th>개찰일시</th>
+            <th>순위</th>
+            <th>총 사업금액</th>
+            <th>바론 지분율</th>
+            <th>바론 지분금액</th>
+            <th>참여사 구성</th>
+            <th>결과</th>
+            <th>낙찰사</th>
+            <th>비고</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+<div id="modal-root"></div>
+
+<script>
+let currentView = 'all';
+let nextId = 23;
+const defaultBids = [
+  {id:1,  name:'청산배수지건설공사기본및실시설계용역', client:'연천군맑은물관리사업소', annoDate:'2025-12-31', deadline:'2026-01-13', openDate:'2026-02-12', rank:'14위', totalAmt:1983366000, pct:3.70, myAmt:73384542, partners:'삼안:한맥:바론:경수=70:30:측량:지반', result:'타사낙찰', winner:'동명', note:''},
+  {id:2,  name:'포천천 인도교 설치사업 기본 및 실시설계 용역', client:'경기도 포천시', annoDate:'2025-12-30', deadline:'2026-01-06', openDate:'-', rank:'-', totalAmt:987470000, pct:1.40, myAmt:13824580, partners:'삼안:XX:바론:XX', result:'불참', winner:'-', note:''},
+  {id:3,  name:'하성농어촌도로리도207호선개설사업기본및실시설계용역', client:'경기도 김포시', annoDate:'2025-12-30', deadline:'2026-01-06', openDate:'2026-01-07(11시)', rank:'22위', totalAmt:479270000, pct:29.00, myAmt:138988300, partners:'삼안:주하:바론:에스피=70:30:측량:지반', result:'타사낙찰', winner:'경동', note:''},
+  {id:4,  name:'진주시 나불지구 풍수해생활권 종합정비사업 기본 및 실시설계', client:'경상남도 진주시', annoDate:'2026-01-05', deadline:'2026-01-20', openDate:'2026-02-27(11시)', rank:'21위', totalAmt:3540500000, pct:11.86, myAmt:419903300, partners:'한맥+혜인+바론+세경(70:30:측량:지질)', result:'타사낙찰', winner:'유신', note:''},
+  {id:5,  name:'양평군 노후하수관로 정비사업 실시설계 용역', client:'양평군환경사업소', annoDate:'2026-01-07', deadline:'2026-01-19', openDate:'2026-02-12(11시)', rank:'10위', totalAmt:1601677000, pct:13.30, myAmt:213023041, partners:'삼안:다산:바론=74:26:측량', result:'타사낙찰', winner:'이산', note:''},
+  {id:6,  name:"금강 하천시설 유지보수 실시설계용역('26~'28년)", client:'금강유역환경청', annoDate:'2025-12-30', deadline:'2026-01-16', openDate:'2026-02-12(13시)', rank:'2위', totalAmt:745000000, pct:10.00, myAmt:74500000, partners:'삼안:한맥:바론=60:40:측량', result:'타사낙찰', winner:'도화', note:''},
+  {id:7,  name:'탄천.한강변차집관로정비공사기본및실시설계용역(협상)', client:'서울특별시', annoDate:'2026-02-09', deadline:'-', openDate:'-', rank:'-', totalAmt:0, pct:0, myAmt:0, partners:'', result:'불참', winner:'-', note:''},
+  {id:8,  name:'수내천(소하천)정비사업 기본 및 실시설계용역', client:'경기도 파주시', annoDate:'2026-01-28', deadline:'2026-02-06', openDate:'2026-02-09(11시)', rank:'16위', totalAmt:613130000, pct:12.00, myAmt:73575600, partners:'삼안:한맥:바론:GSTA=70:30:측량:지반', result:'타사낙찰', winner:'건일', note:''},
+  {id:9,  name:'구례군 소하천정비종합계획수립 및 지형도면신고시 용역', client:'구례군', annoDate:'2026-02-20', deadline:'2026-03-05', openDate:'-', rank:'-', totalAmt:3000000000, pct:25.27, myAmt:0, partners:'한맥:XX:바론:XX', result:'불참', winner:'-', note:''},
+  {id:10, name:'경기북부야생동물 생태관찰원조성사업기본및실시설계용역', client:'경기도청북부청사', annoDate:'2026-02-26', deadline:'2026-03-04', openDate:'2026-03-05(15시)', rank:'-', totalAmt:320870000, pct:10.00, myAmt:32087000, partners:'삼안:75.7:바론:10:소울건축14.86', result:'타사낙찰', winner:'도화', note:''},
+  {id:11, name:'평택시통복천생태하천복원실시설계용역(장기계속계약)', client:'평택시', annoDate:'2026-01-13', deadline:'2026-01-26', openDate:'', rank:'', totalAmt:1279100000, pct:11.50, myAmt:147096500, partners:'삼안:한맥:바론:에스피=70:30:측량+지반', result:'진행중', winner:'', note:''},
+  {id:12, name:'안양시분류식하수관로및노후하수관로정비공사기본및실시설계용역', client:'안양시', annoDate:'2026-02-02', deadline:'2026-02-13', openDate:'', rank:'', totalAmt:1395680000, pct:6.26, myAmt:87369568, partners:'삼안:태조:바론:GSTA=75:25:측량:지반', result:'진행중', winner:'', note:''},
+  {id:13, name:'왕산.갈담자연재해위험개선지구정비사업기본및실시설계용역', client:'용인특례시', annoDate:'2026-02-05', deadline:'2026-02-25', openDate:'', rank:'', totalAmt:3602000000, pct:5.20, myAmt:187304000, partners:'삼안:한맥:바론:GSTA=70:30:측량+지반', result:'진행중', winner:'', note:''},
+  {id:14, name:'파주시소하천정비종합계획재수립용역', client:'파주시', annoDate:'2026-02-05', deadline:'2026-02-20', openDate:'', rank:'', totalAmt:3084000000, pct:23.70, myAmt:730908000, partners:'삼안:한맥:바론=71:29:측량', result:'진행중', winner:'', note:''},
+  {id:15, name:'초월지구풍수해생활권종합정비사업기본및실시설계용역', client:'경기도광주시', annoDate:'2026-02-10', deadline:'2026-02-24', openDate:'', rank:'', totalAmt:3363704000, pct:3.70, myAmt:124457048, partners:'삼안:한맥:바론:에스피=70:30:측량+지반', result:'진행중', winner:'', note:''},
+  {id:16, name:'평택시북부지역노후상수관망정비사업기본및실시설계용역', client:'평택시상하수도사업소', annoDate:'2026-02-10', deadline:'2026-02-24', openDate:'', rank:'', totalAmt:3000000000, pct:7.86, myAmt:235800000, partners:'삼안:바론=분담(설계:측량=92.14:7.86)', result:'진행중', winner:'', note:''},
+  {id:17, name:'안양시 노후상수관망정비사업실시설계용역', client:'안양시', annoDate:'2026-02-11', deadline:'2026-02-25', openDate:'', rank:'', totalAmt:1671659000, pct:12.86, myAmt:214975347, partners:'삼안:태조:바론:에스피=70:30:측량+지반', result:'진행중', winner:'', note:''},
+  {id:18, name:'김해시 소하천 정비종합계획 재수립 및 지형도면고시용역', client:'김해시', annoDate:'2026-02-26', deadline:'2026-03-10', openDate:'3월 중', rank:'', totalAmt:3285800000, pct:19.04, myAmt:625616320, partners:'한맥:XX:바론:XX', result:'진행중', winner:'', note:''},
+  {id:19, name:'충남 어사 자연재해위험개선지구 정비사업 기본 및 실시설계용역', client:'홍성군', annoDate:'2026-02-27', deadline:'2026-03-10', openDate:'3월 중', rank:'', totalAmt:2263590000, pct:5.29, myAmt:119743911, partners:'한맥:XX:바론:XX', result:'진행중', winner:'', note:''},
+  {id:20, name:'유동 자연재해위험개선지구 정비사업 기본 및 실시설계용역', client:'함안군', annoDate:'2026-03-03', deadline:'2026-03-13', openDate:'3월 중', rank:'', totalAmt:906000000, pct:7.14, myAmt:64688400, partners:'한맥:XX:바론:XX', result:'진행중', winner:'', note:''},
+  {id:21, name:'국수 공공하수처리시설 증설사업 기본 및 실시설계 용역', client:'양평군환경사업소', annoDate:'2026-02-24', deadline:'2026-03-10', openDate:'3월 중', rank:'', totalAmt:991100000, pct:0.60, myAmt:5946600, partners:'삼안:한맥:바론=70:30:측량', result:'진행중', winner:'', note:''},
+  {id:22, name:'세종 스마트 국가산단 진입도로 건설공사 기본 및 실시설계용역', client:'세종특별자치시', annoDate:'2026-03-10', deadline:'2026-03-25', openDate:'미정', rank:'', totalAmt:1500000000, pct:6.99, myAmt:104850000, partners:'한맥:86.18:바론:6.99:XX지질6.83', result:'진행중', winner:'', note:'3/11연락옴'},
+];
+
+// localStorage에서 불러오기 (없으면 기본 데이터 사용)
+let bids;
+try {
+  const saved = localStorage.getItem('bids_data');
+  const savedId = localStorage.getItem('bids_nextId');
+  if (saved) {
+    bids = JSON.parse(saved);
+    if (savedId) nextId = parseInt(savedId);
+  } else {
+    bids = defaultBids.map(b => ({...b}));
+  }
+} catch(e) {
+  bids = defaultBids.map(b => ({...b}));
+}
+
+const fmtAmt = n => {
+  if (!n) return '-';
+  if (n >= 100000000) return (n/100000000).toFixed(2)+'억';
+  return (n/10000).toLocaleString()+'만';
+};
+
+function getResult(b) { return b.result || '진행중'; }
+
+function updateNavBadges() {
+  document.getElementById('nb-all').textContent = bids.length;
+  document.getElementById('nb-active').textContent = bids.filter(b=>getResult(b)==='진행중').length;
+  document.getElementById('nb-lost').textContent = bids.filter(b=>getResult(b)==='타사낙찰').length;
+  document.getElementById('nb-skip').textContent = bids.filter(b=>getResult(b)==='불참').length;
+}
+
+function renderMetrics() {
+  const total = bids.length;
+  const active = bids.filter(b=>getResult(b)==='진행중');
+  const lost = bids.filter(b=>getResult(b)==='타사낙찰').length;
+  const skip = bids.filter(b=>getResult(b)==='불참').length;
+  const totalMyAmt = active.reduce((s,b)=>s+b.myAmt,0);
+  const totalBudget = active.reduce((s,b)=>s+b.totalAmt,0);
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric-card"><div class="metric-label">전체</div><div class="metric-val">${total}</div><div class="metric-sub">건</div></div>
+    <div class="metric-card m-warn"><div class="metric-label">진행중</div><div class="metric-val">${active.length}</div><div class="metric-sub">개찰 대기</div></div>
+    <div class="metric-card"><div class="metric-label">타사낙찰</div><div class="metric-val">${lost}</div><div class="metric-sub">건</div></div>
+    <div class="metric-card"><div class="metric-label">불참</div><div class="metric-val">${skip}</div><div class="metric-sub">건</div></div>
+    <div class="metric-card m-info"><div class="metric-label">진행중 바론 지분 합계</div><div class="metric-val">${(totalMyAmt/100000000).toFixed(1)}</div><div class="metric-sub">억원</div></div>
+    <div class="metric-card m-green"><div class="metric-label">진행중 총사업금액</div><div class="metric-val">${(totalBudget/100000000).toFixed(0)}</div><div class="metric-sub">억원</div></div>
+  `;
+}
+
+function renderAlerts() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = bids.filter(b => {
+    if (getResult(b) !== '진행중') return false;
+    if (!b.deadline || b.deadline === '-') return false;
+    const d = new Date(b.deadline); d.setHours(0,0,0,0);
+    const diff = Math.round((d-today)/86400000);
+    return diff >= 0 && diff <= 5;
+  });
+  const el = document.getElementById('alert-area');
+  if (!upcoming.length) { el.innerHTML=''; return; }
+  const items = upcoming.map(b => {
+    const d = new Date(b.deadline); d.setHours(0,0,0,0);
+    const diff = Math.round((d-today)/86400000);
+    const short = b.name.length > 18 ? b.name.slice(0,18)+'…' : b.name;
+    return `<strong>${short}</strong>&nbsp;(${diff===0?'D-DAY':'D-'+diff})`;
+  }).join('&nbsp;&nbsp;·&nbsp;&nbsp;');
+  el.innerHTML=`<div class="alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>마감 임박 (D-5 이내) — ${items}</span></div>`;
+}
+
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll('.nav-item').forEach((el,i)=>el.classList.toggle('active',['all','active','lost','skip'][i]===v));
+  const titles = {all:'입찰 참여 현황', active:'진행중 입찰', lost:'타사낙찰 내역', skip:'불참 내역'};
+  document.getElementById('page-title').textContent = titles[v];
+  render();
+}
+
+function getFiltered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const fr = document.getElementById('f-result').value;
+  const sort = document.getElementById('f-sort').value;
+
+  let data = bids.filter(b => {
+    const r = getResult(b);
+    if (currentView==='active' && r!=='진행중') return false;
+    if (currentView==='lost' && r!=='타사낙찰') return false;
+    if (currentView==='skip' && r!=='불참') return false;
+    if (fr && r!==fr) return false;
+    if (q && !b.name.toLowerCase().includes(q) && !b.client.toLowerCase().includes(q) && !(b.partners||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const toDate = s => { const d=new Date(s); return isNaN(d)?new Date('9999-12-31'):d; };
+  if (sort==='deadline') data.sort((a,b)=>toDate(a.deadline)-toDate(b.deadline));
+  else if (sort==='amount') data.sort((a,b)=>b.totalAmt-a.totalAmt);
+  else if (sort==='pct') data.sort((a,b)=>b.pct-a.pct);
+  else data.sort((a,b)=>b.id-a.id);
+  return data;
+}
+
+function ddayClass(ds, result) {
+  if (result !== '진행중' || !ds || ds==='-') return '';
+  const today=new Date(); today.setHours(0,0,0,0);
+  const d=new Date(ds); d.setHours(0,0,0,0);
+  const diff=Math.round((d-today)/86400000);
+  if (diff<0) return '';
+  if (diff<=2) return 'date-urgent';
+  if (diff<=5) return 'date-warn';
+  return '';
+}
+
+function render() {
+  renderMetrics(); renderAlerts(); updateNavBadges();
+  const data = getFiltered();
+  document.getElementById('page-subtitle').textContent = `총 ${data.length}건`;
+
+  const tbody = document.getElementById('tbody');
+  if (!data.length) { tbody.innerHTML=`<tr><td colspan="14"><div class="empty">조건에 맞는 항목이 없습니다.</div></td></tr>`; return; }
+
+  tbody.innerHTML = data.map(b => {
+    const r = getResult(b);
+    const dlCls = ddayClass(b.deadline, r);
+    return `<tr>
+      <td><div class="td-name">${b.name}</div></td>
+      <td class="td-client">${b.client}</td>
+      <td class="date-cell">${b.annoDate||'-'}</td>
+      <td class="date-cell ${dlCls}">${b.deadline||'-'}</td>
+      <td class="date-cell">${b.openDate||'-'}</td>
+      <td class="td-rank">${b.rank||'-'}</td>
+      <td class="td-amt">${fmtAmt(b.totalAmt)}</td>
+      <td class="td-pct">${b.pct?b.pct.toFixed(2)+'%':'-'}</td>
+      <td class="td-amt" style="color:var(--accent)">${fmtAmt(b.myAmt)}</td>
+      <td class="td-partner">${b.partners||'-'}</td>
+      <td><span class="badge badge-${r}">${r}</span></td>
+      <td style="font-size:11px;color:${b.winner&&b.winner!=='-'?'var(--warn)':'var(--muted)'}">${b.winner||'-'}</td>
+      <td class="td-note">${b.note||'-'}</td>
+      <td><div class="row-acts">
+        <button class="btn btn-sm btn-edit" onclick="editBid(${b.id})">수정</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteBid(${b.id})">삭제</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openModal(bid=null) {
+  const isEdit=!!bid;
+  const b=bid||{id:null,name:'',client:'',annoDate:'',deadline:'',openDate:'',rank:'',totalAmt:'',pct:'',myAmt:'',partners:'',result:'진행중',winner:'',note:''};
+  document.getElementById('modal-root').innerHTML=`
+  <div class="overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-title">${isEdit?'입찰 수정':'새 입찰 등록'}</div>
+      <div class="form-grid">
+        <div class="field full"><label>용역명 *</label><input id="f-name" value="${b.name}" placeholder="용역명을 입력하세요"></div>
+        <div class="field"><label>발주처 *</label><input id="f-client" value="${b.client}" placeholder="발주처명"></div>
+        <div class="field"><label>공고일</label><input id="f-anno" type="date" value="${b.annoDate||''}"></div>
+        <div class="field"><label>등록 마감일</label><input id="f-deadline" type="date" value="${b.deadline||''}"></div>
+        <div class="field"><label>개찰일시</label><input id="f-open" value="${b.openDate||''}" placeholder="예: 2026-03-20(11시)"></div>
+        <div class="field"><label>개찰 순위</label><input id="f-rank" value="${b.rank||''}" placeholder="예: 5위"></div>
+        <div class="field"><label>총 사업금액 (원)</label><input id="f-total" type="number" value="${b.totalAmt||''}" placeholder="예: 1000000000"></div>
+        <div class="field"><label>바론 지분율 (%)</label><input id="f-pct" type="number" step="0.01" value="${b.pct||''}" placeholder="예: 12.5"></div>
+        <div class="field"><label>바론 지분금액 (원)</label><input id="f-myamt" type="number" value="${b.myAmt||''}" placeholder="지분율 입력시 자동계산"></div>
+        <div class="field"><label>결과</label><select id="f-result-modal">
+          ${['진행중','타사낙찰','낙찰','불참'].map(s=>`<option${b.result===s?' selected':''}>${s}</option>`).join('')}
+        </select></div>
+        <div class="field full"><label>참여사 구성</label><input id="f-partners" value="${b.partners||''}" placeholder="예: 삼안:한맥:바론=70:30:측량"></div>
+        <div class="field"><label>낙찰사</label><input id="f-winner" value="${b.winner||''}" placeholder="타사낙찰시 입력"></div>
+        <div class="field"><label>비고</label><input id="f-note" value="${b.note||''}" placeholder="메모"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+        <button class="btn btn-primary" onclick="saveBid(${b.id||'null'})">${isEdit?'저장':'추가'}</button>
+      </div>
+    </div>
+  </div>`;
+  ['f-total','f-pct'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',()=>{
+      const t=parseFloat(document.getElementById('f-total').value)||0;
+      const p=parseFloat(document.getElementById('f-pct').value)||0;
+      if(t&&p) document.getElementById('f-myamt').value=Math.round(t*p/100);
+    });
+  });
+}
+
+function closeModal() { document.getElementById('modal-root').innerHTML=''; }
+
+function saveBids() {
+  try { localStorage.setItem('bids_data', JSON.stringify(bids)); localStorage.setItem('bids_nextId', String(nextId)); } catch(e) {}
+}
+
+function saveBid(id) {
+  const name=document.getElementById('f-name').value.trim();
+  const client=document.getElementById('f-client').value.trim();
+  if(!name||!client){alert('용역명과 발주처는 필수입니다.');return;}
+  const obj={name,client,
+    annoDate:document.getElementById('f-anno').value,
+    deadline:document.getElementById('f-deadline').value,
+    openDate:document.getElementById('f-open').value.trim(),
+    rank:document.getElementById('f-rank').value.trim(),
+    totalAmt:parseInt(document.getElementById('f-total').value)||0,
+    pct:parseFloat(document.getElementById('f-pct').value)||0,
+    myAmt:parseInt(document.getElementById('f-myamt').value)||0,
+    partners:document.getElementById('f-partners').value.trim(),
+    result:document.getElementById('f-result-modal').value,
+    winner:document.getElementById('f-winner').value.trim(),
+    note:document.getElementById('f-note').value.trim(),
+  };
+  if(id !== null && id !== undefined){
+    const numId = Number(id);
+    const i=bids.findIndex(b=>Number(b.id)===numId);
+    if(i===-1){alert('수정할 항목을 찾을 수 없습니다.');return;}
+    bids[i]={...bids[i],...obj};
+    toast('수정되었습니다.');
+  } else {
+    bids.push({id:nextId++,...obj});
+    toast('추가되었습니다.');
+  }
+  saveBids(); closeModal(); render();
+}
+
+function editBid(id){openModal(bids.find(b=>Number(b.id)===Number(id)));}
+
+function deleteBid(id){
+  if(!confirm('삭제하시겠습니까?'))return;
+  bids=bids.filter(b=>Number(b.id)!==Number(id));
+  saveBids(); toast('삭제되었습니다.'); render();
+}
+
+function exportCSV(){
+  const headers=['용역명','발주처','공고일','마감일','개찰일시','순위','총사업금액','바론지분율','바론지분금액','참여사','결과','낙찰사','비고'];
+  const rows=bids.map(b=>[b.name,b.client,b.annoDate,b.deadline,b.openDate,b.rank,b.totalAmt,b.pct+'%',b.myAmt,b.partners,b.result,b.winner,b.note].map(v=>`"${String(v||'').replace(/"/g,'""')}"`));
+  const csv='\uFEFF'+[headers,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='입찰관리_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); toast('CSV 다운로드 완료');
+}
+
+let toastTimer;
+function toast(msg){
+  clearTimeout(toastTimer);
+  document.querySelectorAll('.toast').forEach(e=>e.remove());
+  const el=document.createElement('div');
+  el.className='toast';
+  el.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>${msg}`;
+  document.body.appendChild(el);
+  toastTimer=setTimeout(()=>el.remove(),2500);
+}
+
+render();
+</script>
+</body>
+</html>
