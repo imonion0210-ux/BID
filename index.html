@@ -494,6 +494,19 @@ function openModal(bid=null) {
 
 function closeModal() { document.getElementById('modal-root').innerHTML=''; }
 
+function saveBids() {
+  try { localStorage.setItem('bids_data', JSON.stringify(bids)); localStorage.setItem('bids_nextId', String(nextId)); } catch(e) {}
+}
+
+function loadBids() {
+  try {
+    const saved = localStorage.getItem('bids_data');
+    const savedId = localStorage.getItem('bids_nextId');
+    if (saved) { bids = JSON.parse(saved); }
+    if (savedId) { nextId = parseInt(savedId); }
+  } catch(e) {}
+}
+
 function saveBid(id) {
   const name=document.getElementById('f-name').value.trim();
   const client=document.getElementById('f-client').value.trim();
@@ -511,17 +524,25 @@ function saveBid(id) {
     winner:document.getElementById('f-winner').value.trim(),
     note:document.getElementById('f-note').value.trim(),
   };
-  if(id){const i=bids.findIndex(b=>b.id===id);bids[i]={...bids[i],...obj};toast('수정되었습니다.');}
-  else{bids.push({id:nextId++,...obj});toast('추가되었습니다.');}
-  closeModal(); render();
+  if(id !== null && id !== undefined){
+    const numId = Number(id);
+    const i=bids.findIndex(b=>Number(b.id)===numId);
+    if(i===-1){alert('수정할 항목을 찾을 수 없습니다.');return;}
+    bids[i]={...bids[i],...obj};
+    toast('수정되었습니다.');
+  } else {
+    bids.push({id:nextId++,...obj});
+    toast('추가되었습니다.');
+  }
+  saveBids(); closeModal(); render();
 }
 
-function editBid(id){openModal(bids.find(b=>b.id===id));}
+function editBid(id){openModal(bids.find(b=>Number(b.id)===Number(id)));}
 
 function deleteBid(id){
   if(!confirm('삭제하시겠습니까?'))return;
-  bids=bids.filter(b=>b.id!==id);
-  toast('삭제되었습니다.'); render();
+  bids=bids.filter(b=>Number(b.id)!==Number(id));
+  saveBids(); toast('삭제되었습니다.'); render();
 }
 
 function exportCSV(){
@@ -545,6 +566,7 @@ function toast(msg){
   toastTimer=setTimeout(()=>el.remove(),2500);
 }
 
+loadBids();
 render();
 </script>
 </body>
